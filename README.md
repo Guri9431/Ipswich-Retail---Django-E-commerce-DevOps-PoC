@@ -74,35 +74,6 @@ flake8 .
 | End-to-end | `EndToEndJourneyTests` | register -> browse -> basket -> checkout -> stock update -> order history; stock race |
 | Pipeline smoke | `.github/workflows/ci-cd.yml` | builds the Docker image, starts it, curls `/health/`, `/`, `/cart/`, `/metrics` |
 
-## CI/CD pipeline (`.github/workflows/ci-cd.yml`)
-
-`push / pull request` -> **lint (flake8)** -> **Django check + migration check** -> **tests + coverage gate (80%)** ->
-**Docker build + container smoke test** -> **deploy to Render (main only, via deploy hook)** -> **post-deploy health check** ->
-**Slack notification**.
-
-### GitHub repository secrets to add
-| Secret | Purpose |
-|---|---|
-| `RENDER_DEPLOY_HOOK_URL` | Render service -> Settings -> Deploy Hook |
-| `LIVE_URL` | e.g. `https://ipswich-retail.onrender.com` (for the post-deploy check) |
-| `SLACK_WEBHOOK_URL` | Slack incoming webhook (optional) |
-
-Steps whose secret is missing skip cleanly, so the pipeline is green before you wire up Render and Slack.
-
-## Deploying free on Render
-
-1. Push this repo to a **public** GitHub repository.
-2. Render dashboard -> **New** -> **Blueprint** -> select the repo (`render.yaml` is picked up), free plan.
-3. Copy the service's **Deploy Hook** URL into the `RENDER_DEPLOY_HOOK_URL` GitHub secret; set `LIVE_URL`.
-4. Push to `main` and the pipeline deploys it. Put the live URL and demo credentials in your report.
-
-Limitation to mention in the report: Render's free tier has an ephemeral disk and spins down when idle, so the SQLite
-database is recreated and re-seeded after each deploy or restart. Production would use managed PostgreSQL.
-
-## Branching strategy
-
-`main` (production, protected) <- `develop` (integration) <- `feature/*` branches via pull requests. CI runs on every PR;
-only merges to `main` deploy.
 
 ## Project layout
 
@@ -114,17 +85,3 @@ monitoring/            Prometheus config + alert rules, Grafana provisioning and
 Dockerfile, entrypoint.sh, docker-compose.yml, render.yaml
 docs/                  Architecture, wireframes (draw.io-ready) and report-support notes
 ```
-
-## Product images - adding your own
-
-Each product shows, in this order: **your local file** -> the product's **Image url** (admin; defaults to an online photo)
--> a generated SVG -> `placeholder.svg`. A broken online photo therefore falls back automatically.
-
-**To use your own picture for a product:**
-1. Save it in `store/static/store/products/` named exactly `<product-slug>.jpg` (`.jpeg`, `.png`, `.webp`, `.avif` also work),
-   e.g. `bamboo-chopping-board.jpg`.
-2. VS Code: refresh the browser. Docker: `docker compose up --build`.
-
-No code or database change needed. Run `python manage.py image_status` to list every product, its exact filename and the
-source currently in use. For a hosted photo instead, set the product's **Image url** in `/admin/`.
-New products: add the picture as `<slug>.jpg`, where the slug is the product's slug in the admin.
