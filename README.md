@@ -51,7 +51,7 @@ docker compose up --build
 | Grafana | http://localhost:3000 | `admin` / `admin` (dashboard "Ipswich Retail - Application Health" is pre-provisioned) |
 
 Generate some traffic (browse, add to basket, checkout) and watch the Grafana panels update.
-Stop with `docker compose down` (add `-v` to wipe the SQLite volume).
+Stop with `docker compose down` (add `-v` to wipe the PostgreSQL volume).
 
 Run only the app container:
 ```bash
