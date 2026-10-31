@@ -1,6 +1,7 @@
 # Render Blueprint - free-tier Docker web service.
-# Note: free instances have an ephemeral filesystem, so the SQLite file is
-# re-created and re-seeded on every deploy (acceptable for a PoC; see README).
+# Database: set DATABASE_URL in the Render dashboard (Render Postgres "Internal Database URL" or a
+# Supabase connection string) so data survives restarts. Without it the app falls back to SQLite,
+# whose file is wiped on every deploy on the free tier.
 services:
   - type: web
     name: ipswich-retail
@@ -13,7 +14,9 @@ services:
         value: "False"
       - key: DJANGO_SECRET_KEY
         generateValue: true
-      - key: SQLITE_PATH
+      - key: DATABASE_URL
+        sync: false          # paste your PostgreSQL connection string in the dashboard
+      - key: SQLITE_PATH     # only used when DATABASE_URL is not set
         value: /tmp/db.sqlite3
       - key: DEMO_ADMIN_PASSWORD
         value: Admin@12345
