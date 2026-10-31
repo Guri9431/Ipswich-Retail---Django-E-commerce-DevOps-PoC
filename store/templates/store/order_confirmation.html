@@ -1,0 +1,15 @@
+{% extends "store/base.html" %}
+{% block title %}Order confirmed{% endblock %}
+{% block content %}
+<section class="confirm">
+  <h1>Thank you, {{ order.full_name }}!</h1>
+  <p>Your order <strong>#{{ order.pk }}</strong> has been placed (status: {{ order.get_status_display }}).</p>
+  <table class="table">
+    <thead><tr><th>Item</th><th>Qty</th><th>Total</th></tr></thead>
+    <tbody>{% for i in order.items.all %}<tr><td>{{ i.product.name }}</td><td>{{ i.quantity }}</td><td>&pound;{{ i.line_total }}</td></tr>{% endfor %}</tbody>
+    <tfoot><tr><td colspan="2" class="right"><strong>Total</strong></td><td><strong>&pound;{{ order.total }}</strong></td></tr></tfoot>
+  </table>
+  <p>Shipping to: {{ order.address }}, {{ order.city }}, {{ order.postcode }}</p>
+  <a class="btn" href="{% url 'store:product_list' %}">Continue shopping</a>
+</section>
+{% endblock %}

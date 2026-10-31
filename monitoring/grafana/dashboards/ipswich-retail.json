@@ -1,0 +1,58 @@
+{
+  "title": "Ipswich Retail - Application Health",
+  "uid": "ipswich-retail",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "time": { "from": "now-30m", "to": "now" },
+  "panels": [
+    {
+      "id": 1, "type": "stat", "title": "App up (1 = up)",
+      "gridPos": { "h": 5, "w": 6, "x": 0, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "up{job=\"django-web\"}", "refId": "A" }]
+    },
+    {
+      "id": 2, "type": "stat", "title": "Requests / sec",
+      "gridPos": { "h": 5, "w": 6, "x": 6, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "sum(rate(django_http_requests_total_by_method_total[1m]))", "refId": "A" }]
+    },
+    {
+      "id": 3, "type": "stat", "title": "5xx responses / sec",
+      "gridPos": { "h": 5, "w": 6, "x": 12, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "sum(rate(django_http_responses_total_by_status_total{status=~\"5..\"}[1m]))", "refId": "A" }]
+    },
+    {
+      "id": 4, "type": "stat", "title": "Process memory (MB)",
+      "gridPos": { "h": 5, "w": 6, "x": 18, "y": 0 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "process_resident_memory_bytes{job=\"django-web\"} / 1024 / 1024", "refId": "A" }]
+    },
+    {
+      "id": 5, "type": "timeseries", "title": "Requests by status code",
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 5 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "sum by (status) (rate(django_http_responses_total_by_status_total[1m]))", "legendFormat": "{{status}}", "refId": "A" }]
+    },
+    {
+      "id": 6, "type": "timeseries", "title": "p95 latency by view (s)",
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 5 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "histogram_quantile(0.95, sum by (le, view) (rate(django_http_requests_latency_seconds_by_view_method_bucket[5m])))", "legendFormat": "{{view}}", "refId": "A" }]
+    },
+    {
+      "id": 7, "type": "timeseries", "title": "CPU usage (seconds/sec)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "rate(process_cpu_seconds_total{job=\"django-web\"}[1m])", "refId": "A" }]
+    },
+    {
+      "id": 8, "type": "timeseries", "title": "Database queries / sec",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 14 },
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
+      "targets": [{ "expr": "sum(rate(django_db_execute_total[1m]))", "refId": "A" }]
+    }
+  ]
+}

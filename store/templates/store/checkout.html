@@ -1,0 +1,17 @@
+{% extends "store/base.html" %}
+{% block title %}Checkout{% endblock %}
+{% block content %}
+<h1>Checkout</h1>
+<div class="two-col">
+  <form method="post" class="form">{% csrf_token %}
+    {{ form.as_p }}
+    <p class="note">Payment is simulated in this proof of concept; no card details are collected.</p>
+    <button class="btn" type="submit">Place order</button>
+  </form>
+  <aside class="summary">
+    <h3>Order summary</h3>
+    <ul>{% for item in cart %}<li>{{ item.quantity }} &times; {{ item.product.name }} <span>&pound;{{ item.total_price }}</span></li>{% endfor %}</ul>
+    <p class="total">Total <strong>&pound;{{ cart.total }}</strong></p>
+  </aside>
+</div>
+{% endblock %}

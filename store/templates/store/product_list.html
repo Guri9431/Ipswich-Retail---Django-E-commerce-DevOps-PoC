@@ -1,0 +1,40 @@
+{% extends "store/base.html" %}
+{% load static %}
+{% block title %}{% if category %}{{ category.name }}{% else %}Shop{% endif %}{% endblock %}
+{% block content %}
+<section class="hero">
+  <h1>{% if category %}{{ category.name }}{% elif query %}Results for &ldquo;{{ query }}&rdquo;{% else %}Everyday essentials, delivered{% endif %}</h1>
+  {% if not category and not query %}<p>Quality coffee, kitchenware and home goods from Ipswich Retail.</p>{% endif %}
+</section>
+
+{% if page.object_list %}
+<div class="grid">
+  {% for p in page %}
+  <article class="card">
+    <a href="{{ p.get_absolute_url }}"><img src="{{ p.image_src }}" onerror="this.onerror=null;this.src='{{ p.fallback_src }}'" alt="{{ p.name }}" loading="lazy"></a>
+    <div class="card-body">
+      <small>{{ p.category.name }}</small>
+      <h3><a href="{{ p.get_absolute_url }}">{{ p.name }}</a></h3>
+      <div class="price">&pound;{{ p.price }}</div>
+      {% if p.in_stock %}
+      <form method="post" action="{% url 'store:cart_add' p.id %}">{% csrf_token %}
+        <input type="hidden" name="quantity" value="1">
+        <button class="btn" type="submit">Add to basket</button>
+      </form>
+      {% else %}<span class="out">Out of stock</span>{% endif %}
+    </div>
+  </article>
+  {% endfor %}
+</div>
+
+{% if page.paginator.num_pages > 1 %}
+<nav class="pager">
+  {% if page.has_previous %}<a href="?page={{ page.previous_page_number }}{% if query %}&q={{ query }}{% endif %}">&laquo; Prev</a>{% endif %}
+  <span>Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+  {% if page.has_next %}<a href="?page={{ page.next_page_number }}{% if query %}&q={{ query }}{% endif %}">Next &raquo;</a>{% endif %}
+</nav>
+{% endif %}
+{% else %}
+<p class="empty">No products found.</p>
+{% endif %}
+{% endblock %}

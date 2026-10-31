@@ -1,0 +1,21 @@
+# Render Blueprint - free-tier Docker web service.
+# Note: free instances have an ephemeral filesystem, so the SQLite file is
+# re-created and re-seeded on every deploy (acceptable for a PoC; see README).
+services:
+  - type: web
+    name: ipswich-retail
+    runtime: docker
+    plan: free
+    healthCheckPath: /health/
+    autoDeploy: false   # deployments are triggered by the GitHub Actions deploy hook
+    envVars:
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: SQLITE_PATH
+        value: /tmp/db.sqlite3
+      - key: DEMO_ADMIN_PASSWORD
+        value: Admin@12345
+      - key: DEMO_CUSTOMER_PASSWORD
+        value: Customer@12345

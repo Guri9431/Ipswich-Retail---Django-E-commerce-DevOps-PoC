@@ -1,0 +1,38 @@
+{% extends "store/base.html" %}
+{% block title %}Basket{% endblock %}
+{% block content %}
+<h1>Your basket</h1>
+{% if cart|length %}
+<table class="table">
+  <thead><tr><th>Product</th><th>Price</th><th>Qty</th><th>Total</th><th></th></tr></thead>
+  <tbody>
+  {% for item in cart %}
+    <tr>
+      <td><a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a></td>
+      <td>&pound;{{ item.price }}</td>
+      <td>
+        <form method="post" action="{% url 'store:cart_add' item.product.id %}" class="row">{% csrf_token %}
+          <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="20">
+          <input type="hidden" name="override" value="true">
+          <button class="btn small" type="submit">Update</button>
+        </form>
+      </td>
+      <td>&pound;{{ item.total_price }}</td>
+      <td>
+        <form method="post" action="{% url 'store:cart_remove' item.product.id %}">{% csrf_token %}
+          <button class="btn small danger" type="submit">Remove</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+  <tfoot><tr><td colspan="3" class="right"><strong>Subtotal</strong></td><td colspan="2"><strong>&pound;{{ cart.total }}</strong></td></tr></tfoot>
+</table>
+<p class="actions">
+  <a class="btn secondary" href="{% url 'store:product_list' %}">Continue shopping</a>
+  <a class="btn" href="{% url 'store:checkout' %}">Checkout</a>
+</p>
+{% else %}
+<p class="empty">Your basket is empty. <a href="{% url 'store:product_list' %}">Start shopping</a>.</p>
+{% endif %}
+{% endblock %}

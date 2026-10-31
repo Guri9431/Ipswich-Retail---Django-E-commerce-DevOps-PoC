@@ -1,0 +1,7 @@
+[flake8]
+max-line-length = 120
+exclude = migrations,venv,.venv,staticfiles,__pycache__
+per-file-ignores =
+    store/catalogue.py:E501
+    store/management/commands/seed_data.py:E501
+    store/tests.py:E501

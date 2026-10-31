@@ -1,0 +1,22 @@
+{% extends "store/base.html" %}
+{% load static %}
+{% block title %}{{ product.name }}{% endblock %}
+{% block content %}
+<section class="detail">
+  <img src="{{ product.image_src }}" onerror="this.onerror=null;this.src='{{ product.fallback_src }}'" alt="{{ product.name }}">
+  <div>
+    <small><a href="{{ product.category.get_absolute_url }}">{{ product.category.name }}</a></small>
+    <h1>{{ product.name }}</h1>
+    <div class="price big">&pound;{{ product.price }}</div>
+    <p>{{ product.description }}</p>
+    {% if product.in_stock %}
+      <p class="stock">{{ product.stock }} in stock</p>
+      <form method="post" action="{% url 'store:cart_add' product.id %}" class="row">{% csrf_token %}
+        <label>Qty <input type="number" name="quantity" value="1" min="1" max="20"></label>
+        <button class="btn" type="submit">Add to basket</button>
+      </form>
+    {% else %}<p class="out">Out of stock</p>{% endif %}
+    <p><a href="{% url 'store:product_list' %}">&larr; Continue shopping</a></p>
+  </div>
+</section>
+{% endblock %}

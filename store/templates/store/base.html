@@ -1,0 +1,46 @@
+{% load static %}<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Ipswich Retail{% endblock %} | Ipswich Retail</title>
+  <link rel="stylesheet" href="{% static 'store/style.css' %}">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="{% url 'store:product_list' %}">Ipswich<span>Retail</span></a>
+      <form class="search" method="get" action="{% url 'store:product_list' %}">
+        <input type="search" name="q" placeholder="Search products..." value="{{ query|default:'' }}" aria-label="Search products">
+        <button type="submit">Search</button>
+      </form>
+      <nav class="nav">
+        {% if user.is_authenticated %}
+          <a href="{% url 'store:order_history' %}">My orders</a>
+          <form method="post" action="{% url 'store:logout' %}" class="inline">{% csrf_token %}<button class="linklike" type="submit">Logout ({{ user.username }})</button></form>
+        {% else %}
+          <a href="{% url 'store:login' %}">Login</a>
+          <a href="{% url 'store:register' %}">Register</a>
+        {% endif %}
+        <a class="cart-link" href="{% url 'store:cart_detail' %}">Basket <span class="badge">{{ cart|length }}</span></a>
+      </nav>
+    </div>
+    <div class="container cats">
+      <a href="{% url 'store:product_list' %}">All</a>
+      {% for c in nav_categories %}<a href="{{ c.get_absolute_url }}">{{ c.name }}</a>{% endfor %}
+    </div>
+  </header>
+
+  <main class="container">
+    {% if messages %}
+      <ul class="messages">{% for m in messages %}<li class="msg {{ m.tags }}">{{ m }}</li>{% endfor %}</ul>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">Ipswich Retail &middot; DevOps Proof of Concept &middot;
+      <a href="{% url 'store:health' %}">Health</a> &middot; <a href="/metrics">Metrics</a></div>
+  </footer>
+</body>
+</html>
