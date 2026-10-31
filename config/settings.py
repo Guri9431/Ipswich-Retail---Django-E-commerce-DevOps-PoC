@@ -70,14 +70,27 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# SQLite (as required). The path is configurable so Docker can mount a volume.
-DB_PATH = os.environ.get("SQLITE_PATH", str(BASE_DIR / "db.sqlite3"))
-DATABASES = {
-    "default": {
-        "ENGINE": "django_prometheus.db.backends.sqlite3",
-        "NAME": DB_PATH,
+# Database
+# * DATABASE_URL set  -> PostgreSQL (e.g. postgres://user:password@host:5432/dbname)
+# * DATABASE_URL unset -> SQLite file (SQLITE_PATH lets Docker mount a volume)
+# Nothing else in the project changes: the Django ORM hides the difference.
+DATABASE_URL = os.environ.get("DATABASE_URL", "").strip()
+if DATABASE_URL:
+    import dj_database_url
+
+    DATABASES = {
+        "default": dj_database_url.parse(DATABASE_URL, conn_max_age=600, conn_health_checks=True)
     }
-}
+    # Keep the Prometheus DB metrics (django_db_execute_total, ...) working on PostgreSQL too.
+    DATABASES["default"]["ENGINE"] = "django_prometheus.db.backends.postgresql"
+else:
+    DB_PATH = os.environ.get("SQLITE_PATH", str(BASE_DIR / "db.sqlite3"))
+    DATABASES = {
+        "default": {
+            "ENGINE": "django_prometheus.db.backends.sqlite3",
+            "NAME": DB_PATH,
+        }
+    }
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
