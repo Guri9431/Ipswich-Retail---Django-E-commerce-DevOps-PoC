@@ -1,9 +1,29 @@
-# Local / staging stack: app + Prometheus + Grafana
+# Local / staging stack: app + PostgreSQL + Prometheus + Grafana
 #   docker compose up --build
 # App:        http://localhost:8000
 # Prometheus: http://localhost:9090
 # Grafana:    http://localhost:3000  (admin / admin)
+#
+# The app uses PostgreSQL here via DATABASE_URL. To use an external database (e.g. Supabase)
+# set DATABASE_URL in your shell or an .env file before running `docker compose up`.
 services:
+  db:
+    image: postgres:16-alpine
+    container_name: ipswich-db
+    environment:
+      POSTGRES_DB: ipswich
+      POSTGRES_USER: ipswich
+      POSTGRES_PASSWORD: ipswich
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      # -h 127.0.0.1 so the check only passes once the real server (not the init-time one) is up
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U ipswich -d ipswich"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
   web:
     build: .
     container_name: ipswich-web
@@ -13,9 +33,10 @@ services:
       DJANGO_DEBUG: "${DJANGO_DEBUG:-True}"
       DJANGO_SECRET_KEY: "${DJANGO_SECRET_KEY:-dev-insecure-key-change-me-in-production}"
       DJANGO_ALLOWED_HOSTS: "${DJANGO_ALLOWED_HOSTS:-*}"
-      SQLITE_PATH: /data/db.sqlite3
-    volumes:
-      - sqlite_data:/data
+      DATABASE_URL: "${DATABASE_URL:-postgres://ipswich:ipswich@db:5432/ipswich}"
+    depends_on:
+      db:
+        condition: service_healthy
     restart: unless-stopped
 
   prometheus:
@@ -48,6 +69,6 @@ services:
     restart: unless-stopped
 
 volumes:
-  sqlite_data:
+  postgres_data:
   prometheus_data:
   grafana_data:
